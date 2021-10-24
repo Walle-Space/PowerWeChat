@@ -3,14 +3,15 @@ package auth
 // #reference: https://open.work.weixin.qq.com/api/doc/90000/90135/91039
 
 import (
-	"github.com/ArtisanCloud/go-libs/object"
-	"github.com/ArtisanCloud/go-wechat/src/kernel"
+	"github.com/ArtisanCloud/PowerLibs/object"
+	"github.com/ArtisanCloud/PowerWeChat/src/kernel"
 )
 
 type AccessToken struct {
 	*kernel.AccessToken
 }
 
+// https://open.work.weixin.qq.com/api/doc/90000/90135/91039
 func NewAccessToken(app *kernel.ApplicationInterface) *AccessToken {
 	token := &AccessToken{
 		kernel.NewAccessToken(app),
@@ -22,7 +23,6 @@ func NewAccessToken(app *kernel.ApplicationInterface) *AccessToken {
 
 	return token
 }
-
 
 // Override GetCredentials
 func (accessToken *AccessToken) OverrideGetCredentials() {

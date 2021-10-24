@@ -2,32 +2,120 @@ package main
 
 import (
 	"fmt"
-	fmt2 "github.com/ArtisanCloud/go-libs/fmt"
-	"github.com/ArtisanCloud/go-wechat/src/work"
+	fmt2 "github.com/ArtisanCloud/PowerLibs/fmt"
+	"github.com/ArtisanCloud/PowerWeChat/src/miniProgram"
+	"github.com/ArtisanCloud/PowerWeChat/src/payment"
+	"github.com/ArtisanCloud/PowerWeChat/src/work"
+	"os"
+	"strconv"
 )
+
+func GetWorkConfig() *work.UserConfig {
+	agentID, _ := strconv.Atoi(os.Getenv("agent_id"))
+	return &work.UserConfig{
+		CorpID:  os.Getenv("corp_id"),
+		AgentID: agentID,
+		Secret:  os.Getenv("secret"),
+
+		ResponseType: os.Getenv("array"),
+		Log: work.Log{
+			"debug",
+			"./wechat.log",
+		},
+
+		OAuth: work.OAuth{
+			Callback: os.Getenv("oauth_callback"),
+			Scopes:   []string{},
+		},
+		//HttpDebug: true,
+		Debug: true,
+
+		// server config
+		Token:  os.Getenv("token"),
+		AESKey: os.Getenv("aes_key"),
+	}
+}
+
+func GetPaymentConfig() *payment.UserConfig {
+	return &payment.UserConfig{
+		//"corp_id":        os.Getenv("corp_id"),
+		//"secret":         os.Getenv("secret"),
+		AppID:       os.Getenv("app_id"),
+		MchID:       os.Getenv("mch_id"),
+		MchApiV3Key: os.Getenv("mch_api_v3_key"),
+		Key:         os.Getenv("key"),
+		CertPath:    os.Getenv("wx_cert_path"),
+		KeyPath:     os.Getenv("wx_key_path"),
+		SerialNo:    os.Getenv("serial_no"),
+
+		ResponseType: os.Getenv("array"),
+		Log: payment.Log{
+			Level: "debug",
+			File:  "./wechat.log",
+		},
+		Http: payment.Http{
+			Timeout: 30.0,
+			BaseURI: "https://api.mch.weixin.qq.com",
+		},
+
+		NotifyURL: os.Getenv("notify_url"),
+		HttpDebug: true,
+		//Debug: true,
+		//"sandbox": true,
+
+		// server config
+		//Token:            os.Getenv("token"),
+		//AESKey:           os.Getenv("aes_key"),
+
+	}
+}
+
+func GetMiniProgramConfig() *miniProgram.UserConfig {
+	return &miniProgram.UserConfig{
+
+		AppID:  os.Getenv("miniprogram_app_id"), // 小程序、公众号或者企业微信的appid
+		Secret: os.Getenv("miniprogram_secret"), // 商户号 appID
+
+		ResponseType: os.Getenv("array"),
+		Log: miniProgram.Log{
+			Level: "debug",
+			File:  "./wechat.log",
+		},
+
+		HttpDebug: true,
+		//Debug: true,
+		//"sandbox": true,
+
+	}
+
+}
 
 func main() {
 
 	fmt.Printf("hello Wechat! \n")
 
-	config := GetConfig()
+	// init wecom app
+	configWecom := GetWorkConfig()
+	wecomApp, err := work.NewWork(configWecom)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt2.Dump("wecom config:", wecomApp.GetConfig())
 
-	app := work.NewWork(config)
-	//fmt2.Dump(app)
-	fmt2.Dump(app.GetConfig())
+	// init payment app
+	configPayment := GetPaymentConfig()
+	paymentApp, err := payment.NewPayment(configPayment)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt2.Dump("payment config:", paymentApp.GetConfig())
 
-	//token := app.AccessToken.GetToken()
-	//fmt2.Dump(token)
-
-	//cType := reflect.TypeOf((*app.Components)["base"].(*base.Client))
-	//fmt.Printf("kind %s \n", cType.Kind())
-	//fmt.Printf("type %v \n", cType)
-
-	//ips := app.Base.GetCallbackIp()
-	//fmt2.Dump(ips)
-	//domainIps := app.Base.GetAPIDomainIP()
-	//fmt2.Dump(domainIps)
-
-
+	// init miniProgram app
+	configMiniProgram := GetMiniProgramConfig()
+	miniProgramApp, err := miniProgram.NewMiniProgram(configMiniProgram)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt2.Dump("miniprogram config:", miniProgramApp.GetConfig())
 
 }
